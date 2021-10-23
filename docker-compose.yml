@@ -1,0 +1,57 @@
+version: "3.7"
+
+services:
+  app:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "${PROJECT_NAME}-image"
+    container_name: "${PROJECT_NAME}-container"
+    volumes:
+      - ./app/:/usr/src/app/
+      - ../cdn/:/usr/src/cdn
+    env_file: ./env/dev.env
+    ports:
+      - "0.0.0.0:${EXPOSE_PORT}:80"
+    depends_on:
+      - redis
+    networks:
+      default-network: {}
+      postgres_network: {}
+      
+
+  redis:
+    image: redis:alpine
+    container_name: "${PROJECT_NAME}-redis"
+    restart: unless-stopped
+    networks:
+      default-network: {}
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "${PROJECT_NAME}-image"
+    container_name: "${PROJECT_NAME}-celery"
+    restart: unless-stopped
+    command: celery -A app worker -l info
+    volumes:
+      - ./app/:/usr/src/app/
+      - ./cdn/:/usr/src/cdn/
+    env_file: ./env/dev.env
+    depends_on:
+      - redis
+      - app
+    networks:
+      default-network: {}
+      postgres_network: {}
+      
+
+networks:
+  default-network:
+    external: false
+    name: default-network
+  postgres_network:
+    external: true
+    name: postgres_network

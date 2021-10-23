@@ -1,0 +1,21 @@
+*.pyc
+__pycache__
+*.sqlite3
+.DS_Store
+bin
+include
+lib
+lib64
+
+
+
+
+# Project
+.vscode
+
+*.pyc
+cdn
+share
+src/migrations
+src/media
+/__pycache__
